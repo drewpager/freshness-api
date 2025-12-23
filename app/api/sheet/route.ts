@@ -1,0 +1,45 @@
+import { GoogleSpreadsheet } from 'google-spreadsheet';
+import { JWT } from 'google-auth-library';
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  try {
+    // 1. Auth
+    const serviceAccountAuth = new JWT({
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    if (!process.env.GOOGLE_SHEET_ID) {
+      throw new Error('GOOGLE_SHEET_ID is not defined');
+    }
+
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+
+    // 2. Load Data
+    await doc.loadInfo(); // loads document properties and worksheets
+    const sheet = doc.sheetsByIndex[0]; // get the first sheet
+    const rows = await sheet.getRows(); // can pass { limit, offset }
+
+    // 3. Format Data (convert to plain JSON)
+    const data = rows.map((row) => {
+      // row.toObject() converts the row to a key-value object based on header row
+      return row.toObject();
+    });
+
+    // 4. Return Response with Caching
+    // Cache for 60 seconds to avoid hitting Google's rate limits
+    return NextResponse.json(
+      { data },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 's-maxage=60, stale-while-revalidate',
+        },
+      }
+    );
+  } catch (error: Error | any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
