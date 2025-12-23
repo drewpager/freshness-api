@@ -1,6 +1,9 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { NextResponse } from 'next/server';
+import dotenv from 'dotenv'
+
+dotenv.config({})
 
 export async function GET() {
   try {
@@ -19,7 +22,9 @@ export async function GET() {
 
     // 2. Load Data
     await doc.loadInfo(); // loads document properties and worksheets
-    const sheet = doc.sheetsByIndex[0]; // get the first sheet
+    console.log(doc.title);
+    // const sheet = doc.sheetsByIndex[0]; // get the first sheet
+    const sheet = doc.sheetsById["933618974"];
     const rows = await sheet.getRows(); // can pass { limit, offset }
 
     // 3. Format Data (convert to plain JSON)

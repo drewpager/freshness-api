@@ -1,4 +1,5 @@
 import Image from "next/image";
+require('@dotenvx/dotenvx').config()
 
 export default function Home() {
   return (
