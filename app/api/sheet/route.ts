@@ -1,9 +1,14 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { NextResponse } from 'next/server';
+import { corsHeaders } from '@/lib/cors';
 import dotenv from 'dotenv'
 
 dotenv.config({})
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function GET() {
   try {
@@ -45,11 +50,12 @@ export async function GET() {
       {
         status: 200,
         headers: {
+          ...corsHeaders,
           'Cache-Control': 's-maxage=60, stale-while-revalidate',
         },
       }
     );
   } catch (error: Error | any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: corsHeaders });
   }
 }
