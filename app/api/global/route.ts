@@ -19,17 +19,17 @@ export async function GET() {
     }
 
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-    const summarySheetID: number | undefined = Number(process.env.GOOGLE_SSID);
+    const globalSheetID: number | undefined = Number(process.env.GOOGLE_GSID);
 
-    if (!summarySheetID) {
-      throw new Error('GOOGLE_SSID is not defined');
+    if (!globalSheetID) {
+      throw new Error('GOOGLE_GSID is not defined');
     }
 
     // 2. Load Data
     await doc.loadInfo(); // loads document properties and worksheets
     console.log(doc.title);
     // const sheet = doc.sheetsByIndex[0]; // get the first sheet
-    const sheet = doc.sheetsById[summarySheetID ? summarySheetID : 933618974];
+    const sheet = doc.sheetsById[globalSheetID ? globalSheetID : 933618974];
     const rows = await sheet.getRows(); // can pass { limit, offset }
 
     // 3. Format Data (convert to plain JSON)
